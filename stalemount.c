@@ -18,7 +18,7 @@ struct {
     __type(value, u32);
     __uint(max_entries, 1 << 14);
     __uint(pinning, LIBBPF_PIN_BY_NAME);
-} active_opens SEC(".maps");
+} stalemount_active_opens SEC(".maps");
 
 struct {
     __uint(type, BPF_MAP_TYPE_HASH);
@@ -26,7 +26,7 @@ struct {
     __type(value, u32);
     __uint(max_entries, 1 << 14);
     __uint(pinning, LIBBPF_PIN_BY_NAME);
-} policies SEC(".maps");
+} stalemount_policies SEC(".maps");
 
 static __always_inline int check_file(struct file* file, bool opening)
 {
@@ -36,8 +36,8 @@ static __always_inline int check_file(struct file* file, bool opening)
     if (!mnt) return 0;
 
     int mnt_id = BPF_CORE_READ(mnt, mnt_id);
-    u32* open_count = bpf_map_lookup_elem(&active_opens, &mnt_id);
-    u32* policy = bpf_map_lookup_elem(&policies, &mnt_id);
+    u32* open_count = bpf_map_lookup_elem(&stalemount_active_opens, &mnt_id);
+    u32* policy = bpf_map_lookup_elem(&stalemount_policies, &mnt_id);
 
     if (open_count == NULL || policy == NULL) return 0;
 
